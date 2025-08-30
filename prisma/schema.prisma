@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Recruiter {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  rank        String?
+  email       String?
+  phone       String?
+  bio         String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  leads       Lead[]
+
+  @@map("recruiters")
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  age         Int?
+  interests   String[] // Array of military interests/roles
+  message     String?
+  source      String?  // How they heard about NY Guard
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Recruiter attribution
+  recruiterId String?
+  recruiter   Recruiter? @relation(fields: [recruiterId], references: [id])
+  
+  // Lead status
+  status      LeadStatus @default(NEW)
+  notes       String?
+
+  @@map("leads")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  SCHEDULED
+  CONVERTED
+  NOT_INTERESTED
+}
